@@ -1,0 +1,12 @@
+[package]
+name = "sigmaos-eda"
+version = "0.1.0"
+edition = "2021"
+license = "GPL-3.0-or-later"
+description = "SigmaOS component: eda"
+
+[dependencies]
+
+[[bin]]
+name = "sigmaos-eda"
+path = "src/main.rs"
