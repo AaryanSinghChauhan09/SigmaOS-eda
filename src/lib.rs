@@ -122,8 +122,12 @@ pub fn column_stats(table: &Table, index: usize) -> Result<ColumnStats, EdaError
             Ok(v) => {
                 count += 1;
                 sum += v;
-                if v < min { min = v; }
-                if v > max { max = v; }
+                if v < min {
+                    min = v;
+                }
+                if v > max {
+                    max = v;
+                }
             }
             Err(_) => missing += 1,
         }
@@ -180,7 +184,11 @@ pub fn correlation(table: &Table, a: usize, b: usize) -> Result<f64, EdaError> {
 }
 
 /// Frequency map of values in a column (top-N by count).
-pub fn value_counts(table: &Table, index: usize, top: usize) -> Result<BTreeMap<String, usize>, EdaError> {
+pub fn value_counts(
+    table: &Table,
+    index: usize,
+    top: usize,
+) -> Result<BTreeMap<String, usize>, EdaError> {
     let mut counts = BTreeMap::new();
     for row in &table.rows {
         if let Some(cell) = row.get(index) {
