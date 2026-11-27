@@ -229,4 +229,67 @@ mod tests {
         assert_eq!(t.rows[0][0], "x,y");
         assert_eq!(t.rows[0][1], "q\"z");
     }
+
+    #[test]
+    fn test_parse_csv_rejects_empty_and_blank_header_aaa() {
+        // Arrange
+        let empty_input = "";
+        let blank_header = "a, \n1,2\n";
+
+        // Act
+        let empty_res = parse_csv(empty_input);
+        let blank_res = parse_csv(blank_header);
+
+        // Assert
+        assert!(matches!(empty_res, Err(EdaError::Parse(_))));
+        assert!(matches!(blank_res, Err(EdaError::Parse(_))));
+    }
+
+    #[test]
+    fn test_column_stats_out_of_bounds_and_all_missing_aaa() {
+        // Arrange
+        let table = parse_csv("label,val\na,N/A\nb,\n").unwrap();
+
+        // Act
+        let missing_col = column_stats(&table, 99);
+        let non_numeric_stats = column_stats(&table, 1).unwrap();
+
+        // Assert
+        assert!(matches!(missing_col, Err(EdaError::MissingColumn(_))));
+        assert_eq!(non_numeric_stats.numeric_count, 0);
+        assert_eq!(non_numeric_stats.missing, 2);
+        assert_eq!(non_numeric_stats.min, None);
+        assert_eq!(non_numeric_stats.max, None);
+        assert_eq!(non_numeric_stats.mean, None);
+    }
+
+    #[test]
+    fn test_correlation_rejects_zero_variance_and_insufficient_pairs_aaa() {
+        // Arrange
+        let constant_table = parse_csv("x,y\n1,5\n2,5\n3,5\n").unwrap();
+        let single_pair = parse_csv("x,y\n1,2\n").unwrap();
+
+        // Act
+        let zero_var_res = correlation(&constant_table, 0, 1);
+        let single_res = correlation(&single_pair, 0, 1);
+
+        // Assert
+        assert!(matches!(zero_var_res, Err(EdaError::Parse(_))));
+        assert!(matches!(single_res, Err(EdaError::Parse(_))));
+    }
+
+    #[test]
+    fn test_value_counts_top_n_ordering_aaa() {
+        // Arrange
+        let table = parse_csv("color\nred\nblue\nred\ngreen\nblue\nred\n").unwrap();
+
+        // Act
+        let top_two = value_counts(&table, 0, 2).unwrap();
+
+        // Assert
+        assert_eq!(top_two.len(), 2);
+        assert_eq!(top_two.get("red"), Some(&3));
+        assert_eq!(top_two.get("blue"), Some(&2));
+        assert_eq!(top_two.get("green"), None);
+    }
 }
